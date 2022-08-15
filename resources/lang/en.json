@@ -1,0 +1,7 @@
+{
+    "event_not_found": "This event does not exist.",
+    "event_created": "Event created.",
+    "event_updated": "Event updated.",
+    "event_deleted": "Event deleted.",
+    "slot_not_available": "The slot is not available."
+}
