@@ -11,12 +11,12 @@ The technologies used are :
 
 ## How to install it
 Nothing could be easier:
-1. Rename the ".env.example" file at the root of the project to ".env" and fill in the connection information to the database:
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=
-    DB_USERNAME=
+1. Rename the ".env.example" file at the root of the project to ".env" and fill in the connection information to the database:  
+    DB_CONNECTION=mysql  
+    DB_HOST=127.0.0.1  
+    DB_PORT=3306  
+    DB_DATABASE=  
+    DB_USERNAME=  
     DB_PASSWORD=
 2. Execute the following commands from your console at the root of the project:
     - composer install
