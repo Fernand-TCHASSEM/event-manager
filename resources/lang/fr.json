@@ -1,3 +1,7 @@
 {
-    "event_not_found": "Cet évènement n'existe pas"
+    "event_not_found": "Cet évènement n'existe pas.",
+    "event_created": "Evènement créé.",
+    "event_updated": "Evènement modifié.",
+    "event_deleted": "Evènement supprimé.",
+    "slot_not_available": "Le créneau n'est pas disponible."
 }

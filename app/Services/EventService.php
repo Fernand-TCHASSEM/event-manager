@@ -21,8 +21,8 @@ class EventService
 
             $now = Carbon::now();
 
-            $startOfWeek = clone($now)->startOfWeek();
-            $endOfWeek = clone($now)->endOfWeek();
+            $startOfWeek = clone ($now)->startOfMonth();
+            $endOfWeek = clone ($now)->endOfMonth();
 
             $startDate = $startOfWeek->format('Y-m-d H:i:s');
             $endDate = $endOfWeek->format('Y-m-d H:i:s');
@@ -36,7 +36,22 @@ class EventService
         $events = $this->eventRepository->filterEvents($startDate, $endDate, $keywords);
 
         return [
-            'data' => $events
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'keywords' => $keywords
+            ],
+            'events' => $events->transform(function ($item, $key) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->title,
+                    'description' => $item->description,
+                    'start' => $item->start_date,
+                    'end' => $item->end_date,
+                    'color' => $item->color,
+                    'timed' => true
+                ];
+            })
         ];
     }
 
@@ -51,18 +66,25 @@ class EventService
                 'data' => $event->toArray()
             ];
         } else {
-            abort(422, trans('event.event_not_found'));
+            abort(422, trans('event_not_found'));
         }
     }
 
     public function create($input)
     {
 
-        $event = $this->eventRepository->create($input);
+        $isSlotAvailable = $this->eventRepository->checkSlotAvailability($input['start_date'], $input['end_date']);
 
-        return [
-            'data' => $event->toArray()
-        ];
+        if ($isSlotAvailable) {
+
+            $event = $this->eventRepository->create($input);
+
+            return [
+                'data' => $event->toArray()
+            ];
+        } else {
+            abort(422, trans('slot_not_available'));
+        }
     }
 
     public function update($id, $input)
@@ -72,17 +94,24 @@ class EventService
 
         if ($event !== null) {
 
-            $this->eventRepository->setModel($event);
+            $isSlotAvailable = $this->eventRepository->checkSlotAvailability($input['start_date'], $input['end_date'], $id);
 
-            $this->eventRepository->update($input);
+            if ($isSlotAvailable) {
 
-            $event = $this->eventRepository->getModel();
+                $this->eventRepository->setModel($event);
 
-            return [
-                'data' => $event->toArray()
-            ];
+                $this->eventRepository->update($input);
+
+                $event = $this->eventRepository->getModel();
+
+                return [
+                    'data' => $event->toArray()
+                ];
+            } else {
+                abort(422, trans('slot_not_available'));
+            }
         } else {
-            abort(422, trans('event.event_not_found'));
+            abort(422, trans('event_not_found'));
         }
     }
 
@@ -101,7 +130,7 @@ class EventService
                 'data' => $event->toArray()
             ];
         } else {
-            abort(422, trans('event.event_not_found'));
+            abort(422, trans('event_not_found'));
         }
     }
 }

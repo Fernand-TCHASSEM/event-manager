@@ -78,8 +78,8 @@
         data() {
             return {
                 form: this.$inertia.form({
-                    email: '',
-                    password: '',
+                    email: 'admin@lynx-business.com',
+                    password: 'LynxBusiness',
                     remember: false
                 })
             }

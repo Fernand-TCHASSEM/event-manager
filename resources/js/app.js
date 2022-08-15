@@ -6,11 +6,13 @@ import { App as InertiaApp, plugin as InertiaPlugin } from '@inertiajs/inertia-v
 import PortalVue from 'portal-vue';
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
+import DatetimePicker from 'vuetify-datetime-picker';
 
 Vue.mixin({ methods: { route } });
 Vue.use(InertiaPlugin);
 Vue.use(PortalVue);
 Vue.use(Vuetify);
+Vue.use(DatetimePicker);
 
 const app = document.getElementById('app');
 

@@ -28,12 +28,24 @@ class EventRepository extends BaseRepository implements EventInterface
 
     public function filterEvents(string $fromDate, string $toDate, string $keywords = null): Collection
     {
-        $events = $this->model->select(DB::raw('id, title AS name, start_date AS start, end_date AS end, color'))
-        ->dateRange($fromDate, $toDate)
-        ->keywords($keywords)
-        ->orderBy('start_date', 'desc')
-        ->get();
+        $events = $this->model
+            ->dateRange($fromDate, $toDate)
+            ->keywords($keywords)
+            ->orderBy('start_date', 'desc')
+            ->get();
 
         return $events;
+    }
+
+    public function checkSlotAvailability(string $fromDate, string $toDate, int $eventId = null): bool
+    {
+        $eventsNumber = $this->model
+            ->dateRange($fromDate, $toDate)
+            ->when($eventId, function ($query, $eventId) {
+                return $query->where('id', '<>', $eventId);
+            })
+            ->count();
+
+        return !$eventsNumber ? true : false;
     }
 }

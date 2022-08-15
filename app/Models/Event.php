@@ -48,8 +48,12 @@ class Event extends Model
      */
     public function scopeDateRange(Builder $query, string $fromDate, string $toDate): Builder
     {
-        return $query->where('start_date', '>=', $fromDate)
-            ->where('end_date', '<=', $toDate);
+        return $query->whereBetween('start_date', [$fromDate, $toDate])
+            ->orWhereBetween('end_date', [$fromDate, $toDate])
+            ->orWhere([
+                ['start_date', '<=', $fromDate],
+                ['end_date', '>=', $toDate]
+            ]);
     }
 
     /**
