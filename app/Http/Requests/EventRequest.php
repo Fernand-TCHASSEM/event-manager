@@ -23,30 +23,12 @@ class EventRequest extends FormRequest
      */
     public function rules()
     {
-
-        $verb = $this->method();
-
-        $routeURI = $this->route()->getName();
-
-        if ($verb === 'GET') {
-
-            if ($routeURI === 'dashboard') {
-                return [
-                    'start_date' => 'sometimes|date',
-                    'end_date' => 'sometimes|date',
-                    'keywords' => 'sometimes|string',
-                ];
-            }
-        } elseif ($verb === 'POST' || $verb === 'PUT') {
-            return [
-                'title' => 'required|string',
-                'description' => 'required|string',
-                'start_date' => 'required|date',
-                'end_date' => 'required|date|after:start_date',
-                'color' => 'required|string',
-            ];
-        }
-
-        return [];
+        return [
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'color' => 'required|string',
+        ];
     }
 }
