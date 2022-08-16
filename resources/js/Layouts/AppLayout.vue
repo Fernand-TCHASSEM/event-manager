@@ -224,6 +224,10 @@
                 </div>
             </header>
 
+            <div class="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8">
+                <slot name="flash-message"></slot>
+            </div>
+
             <!-- Page Content -->
             <main>
                 <slot></slot>
