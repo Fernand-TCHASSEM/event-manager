@@ -4,11 +4,78 @@
       <h2 class="font-semibold text-xl text-gray-800 leading-tight">Events</h2>
     </template>
 
-    <template #flash-message>
-      <v-app id="message-block-app">
-        <v-alert  v-if="$page.props.flash.success && show" type="success" close-text="Close Alert" dismissible>
+    <template #additionnal-block>
+      <v-app id="additionnal-block-app">
+        <v-alert
+          v-if="$page.props.flash.success && show"
+          type="success"
+          close-text="Close Alert"
+          dismissible
+        >
           {{ $page.props.flash.success }}
         </v-alert>
+
+        <v-card elevation="1">
+          <v-card-title>
+            <v-row>
+              <v-col cols="4" class="self-end">Filters</v-col>
+              <v-col cols="3" offset="1">
+                <v-menu
+                  ref="menu"
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :return-value.sync="dates"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="dateRangeText"
+                      label="Date range"
+                      append-icon="mdi-calendar"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                      single-line
+                      hide-details
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker v-model="dates" range>
+                    <v-spacer></v-spacer>
+                    <v-btn text color="primary" @click="menu = false">
+                      Cancel
+                    </v-btn>
+                    <v-btn text color="primary" @click="$refs.menu.save(dates)">
+                      OK
+                    </v-btn>
+                  </v-date-picker>
+                </v-menu>
+              </v-col>
+              <v-col cols="3">
+                <v-text-field
+                  v-model="mutableFilter.keywords"
+                  append-icon="mdi-pencil"
+                  label="Search"
+                  single-line
+                  hide-details
+                ></v-text-field>
+              </v-col>
+              <v-col cols="1" class="self-end">
+                <v-btn
+                  class="mx-2"
+                  fab
+                  dark
+                  small
+                  color="primary"
+                  @click="fetchEvents"
+                >
+                  <v-icon>mdi-magnify</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-title>
+        </v-card>
       </v-app>
     </template>
 
@@ -82,6 +149,7 @@
                   <v-calendar
                     ref="calendar"
                     v-model="focus"
+                    :start="calendarStartDate"
                     color="primary"
                     :events="events"
                     :event-color="getEventColor"
@@ -122,6 +190,7 @@ export default {
     return {
       show: true,
       focus: "",
+      calendarStartDate: this.filters.start_date,
       type: "month",
       typeToLabel: {
         month: "Month",
@@ -134,23 +203,31 @@ export default {
         endDate: this.filters.end_date,
         keywords: this.filters.keywords,
       },
+      dates: [this.filters.start_date, this.filters.end_date],
+      menu: false,
     };
+  },
+  computed: {
+    dateRangeText() {
+      return (
+        moment(this.mutableFilter.startDate).format("YYYY-MM-DD") +
+        " ~ " +
+        moment(this.mutableFilter.endDate).format("YYYY-MM-DD")
+      );
+    },
   },
   watch: {
     mutableFilter: {
       deep: true,
-      handler: throttle(function () {
-        this.$inertia.get("/events", pickBy(this.mutableFilter), {
-          preserveState: true,
-        });
-      }, 150),
+      handler(val) {
+        this.dates[0] = val.startDate;
+        this.dates[1] = val.endDate;
+      },
     },
-    watch: {
-      "$page.props.flash": {
-        handler() {
-          this.show = true;
-        },
-        deep: true,
+    "$page.props.flash": {
+      deep: true,
+      handler() {
+        this.show = true;
       },
     },
   },
@@ -174,23 +251,34 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-    fetchEvents({ start, end }) {
-      const min = moment(`${start.date}T00:00:00`).format(
-        "YYYY-MM-DD HH:mm:ss"
-      );
-      const max = moment(`${end.date}T23:59:59`).format("YYYY-MM-DD HH:mm:ss");
+    fetchEvents({ start = null, end = null }) {
+      if (start) {
+        this.mutableFilter.startDate = start.date;
+        start = start.date + "T00:00:00";
+      } else {
+        start = this.dates[0] + " 00:00:00";
+      }
 
-      this.$inertia.get(
-        "/events",
-        {
-          start_date: min,
-          end_date: max,
-          //   keywords: this.mutableFilter.keywords,
+      if (end) {
+        this.mutableFilter.endDate = end.date;
+        end = end.date + "T23:59:59";
+      } else {
+        end = this.dates[1] + " 23:59:59";
+      }
+
+      var data = {
+        start_date: moment(start).format("YYYY-MM-DD HH:mm:ss"),
+        end_date: moment(end).format("YYYY-MM-DD HH:mm:ss"),
+        keywords: this.mutableFilter.keywords,
+      };
+
+      this.$inertia.get("/events", data, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          this.calendarStartDate = data.start_date;
         },
-        {
-          preserveState: true,
-        }
-      );
+      });
     },
     showEditingModal(e) {
       this.$root.$emit("show-editing-modal", e.event ? e.event : null);
@@ -200,11 +288,11 @@ export default {
 </script>
 
 <style>
-#message-block-app {
+#additionnal-block-app {
   background-color: transparent !important;
 }
 
-#message-block-app > .v-application--wrap {
+#additionnal-block-app > .v-application--wrap {
   min-height: min-content !important;
 }
 </style>
