@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use \Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -69,8 +70,8 @@ class Event extends Model
         if ($keywords) {
             $keywords = strtolower($keywords);
 
-            $query->whereRaw('lower(title)', 'like', '%' . $keywords . '%')
-                ->orWhereRaw('lower(description)', 'like', '%' . $keywords . '%');
+            $query->where(DB::raw('lower(title)'), 'like', '%' . $keywords . '%')
+                ->orWhere(DB::raw('lower(description)'), 'like', '%' . $keywords . '%');
         }
 
         return $query;

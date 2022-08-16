@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Http\Requests\EventRequest;
 use Illuminate\Support\Facades\Redirect;
 use App\Services\Facades\EventFacade as Event;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EventController extends Controller
@@ -15,10 +16,14 @@ class EventController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(EventRequest $request)
+    public function index(Request $request)
     {
 
-        $input = $request->validated();
+        $input = $request->all([
+            'start_date',
+            'end_date',
+            'keywords'
+        ]);
 
         $eventData = Event::getEvents($input);
 
