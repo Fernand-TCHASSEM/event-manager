@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\Contracts\EventInterface;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class EventService
 {
@@ -63,10 +64,15 @@ class EventService
         if ($event !== null) {
 
             return [
+                'status' => 200,
                 'data' => $event->toArray()
             ];
         } else {
-            abort(422, trans('event_not_found'));
+
+            return [
+                'code' => 422,
+                'message' => trans('event_not_found')
+            ];
         }
     }
 
@@ -80,10 +86,16 @@ class EventService
             $event = $this->eventRepository->create($input);
 
             return [
+                'code' => 200,
                 'data' => $event->toArray()
             ];
         } else {
-            abort(422, trans('slot_not_available'));
+
+            return [
+                'code' => 400,
+                'field' => 'slot',
+                'message' => trans('slot_not_available')
+            ];
         }
     }
 
@@ -105,13 +117,23 @@ class EventService
                 $event = $this->eventRepository->getModel();
 
                 return [
+                    'code' => 200,
                     'data' => $event->toArray()
                 ];
             } else {
-                abort(422, trans('slot_not_available'));
+
+                return [
+                    'code' => 400,
+                    'field' => 'slot',
+                    'message' => trans('slot_not_available')
+                ];
             }
         } else {
-            abort(422, trans('event_not_found'));
+            
+            return [
+                'code' => 422,
+                'message' => trans('event_not_found')
+            ];
         }
     }
 
@@ -127,10 +149,15 @@ class EventService
             $isDeleted = $this->eventRepository->delete();
 
             return [
+                'code' => 200,
                 'data' => $event->toArray()
             ];
         } else {
-            abort(422, trans('event_not_found'));
+            
+            return [
+                'code' => 422,
+                'message' => trans('event_not_found')
+            ];
         }
     }
 }

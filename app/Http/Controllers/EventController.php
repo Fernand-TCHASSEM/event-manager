@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Http\Requests\EventRequest;
 use Illuminate\Support\Facades\Redirect;
 use App\Services\Facades\EventFacade as Event;
+use Illuminate\Http\Response;
 
 class EventController extends Controller
 {
@@ -44,9 +45,13 @@ class EventController extends Controller
     {
         $input = $request->validated();
 
-        Event::create($input);
+        $eventData = Event::create($input);
 
-        return Redirect::back()->with('success', trans('event_created'));
+        if ($eventData['code'] === Response::HTTP_OK) {
+            return Redirect::back()->with('success', trans('event_created'));
+        } else {
+            return Redirect::back()->withErrors([$eventData['field'] => $eventData['message']]);
+        }
     }
 
     /**
@@ -84,7 +89,11 @@ class EventController extends Controller
 
         $eventData = Event::update($id, $input);
 
-        return Redirect::back()->with('success', trans('event_updated'));
+        if ($eventData['code'] === Response::HTTP_OK) {
+            return Redirect::back()->with('success', trans('event_updated'));
+        } else {
+            return Redirect::back()->withErrors([$eventData['field'] => $eventData['message']]);
+        }
     }
 
     /**

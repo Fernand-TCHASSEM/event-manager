@@ -4,7 +4,15 @@
       <h2 class="font-semibold text-xl text-gray-800 leading-tight">Events</h2>
     </template>
 
-    <div class="py-12">
+    <template #flash-message>
+      <v-app id="message-block-app">
+        <v-alert  v-if="$page.props.flash.success && show" type="success" close-text="Close Alert" dismissible>
+          {{ $page.props.flash.success }}
+        </v-alert>
+      </v-app>
+    </template>
+
+    <div class="pt-6 pb-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
           <v-app id="inspire">
@@ -29,10 +37,16 @@
                     <v-toolbar-title v-if="$refs.calendar">
                       {{ $refs.calendar.title }}
                     </v-toolbar-title>
-                    <v-btn color="primary" dark class="m-auto" @click="showEditingModal">Add an event</v-btn>
+                    <v-btn
+                      color="primary"
+                      dark
+                      class="m-auto"
+                      @click="showEditingModal"
+                      >Add an event</v-btn
+                    >
 
                     <!-- Modal for editing an event -->
-                    <edit-event/>
+                    <edit-event />
 
                     <v-menu bottom right>
                       <template v-slot:activator="{ on, attrs }">
@@ -106,6 +120,7 @@ export default {
   },
   data() {
     return {
+      show: true,
       focus: "",
       type: "month",
       typeToLabel: {
@@ -129,7 +144,15 @@ export default {
           preserveState: true,
         });
       }, 150),
-    }
+    },
+    watch: {
+      "$page.props.flash": {
+        handler() {
+          this.show = true;
+        },
+        deep: true,
+      },
+    },
   },
   mounted() {
     this.$refs.calendar.checkChange();
@@ -170,8 +193,18 @@ export default {
       );
     },
     showEditingModal(e) {
-      this.$root.$emit('show-editing-modal', (e.event ? e.event : null));
+      this.$root.$emit("show-editing-modal", e.event ? e.event : null);
     },
-  }
+  },
 };
 </script>
+
+<style>
+#message-block-app {
+  background-color: transparent !important;
+}
+
+#message-block-app > .v-application--wrap {
+  min-height: min-content !important;
+}
+</style>

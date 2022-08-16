@@ -11,32 +11,38 @@
         </v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pb-0">
+          <v-alert v-if="errors && errors.slot" type="error" class="my-2">
+            {{ errors.slot }}
+          </v-alert>
           <v-container>
             <v-row>
-              <v-col cols="12" class="py-2">
+              <v-col cols="12">
                 <v-text-field
                   :counter="100"
                   label="Title"
                   required
                   v-model="form.title"
+                  :error-messages="errors ? errors.title : null"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" class="py-2">
+              <v-col cols="12">
                 <v-textarea
                   :counter="255"
                   height="75"
                   label="Description"
                   required
                   v-model="form.description"
+                  :error-messages="errors ? errors.description : null"
                 ></v-textarea>
               </v-col>
-              <v-col cols="6" class="py-2">
+              <v-col cols="6">
                 <v-datetime-picker
                   label="Start date"
                   :text-field-props="textFieldProps"
                   :date-picker-props="dateProps"
                   :time-picker-props="timeProps"
                   v-model="pickedStartDate"
+                  :error-messages="errors ? errors.start_date : null"
                   ref="txtPickedStartDate"
                   readonly
                 >
@@ -48,13 +54,14 @@
                   </template>
                 </v-datetime-picker>
               </v-col>
-              <v-col cols="6" class="py-2">
+              <v-col cols="6">
                 <v-datetime-picker
                   label="End date"
                   :text-field-props="textFieldProps"
                   :date-picker-props="dateProps"
                   :time-picker-props="timeProps"
                   v-model="pickedEndDate"
+                  :error-messages="errors ? errors.end_date : null"
                   ref="txtPickedEndDate"
                   readonly
                 >
@@ -66,7 +73,7 @@
                   </template>
                 </v-datetime-picker>
               </v-col>
-              <v-col cols="12" class="d-flex py-2">
+              <v-col cols="12" class="d-flex">
                 <label class="v-label theme--light v-label-color"
                   >Color :</label
                 >
@@ -135,12 +142,14 @@
 <script>
 import moment from "moment";
 
+const DEFAULT_COLOR = "#2196f3";
+
 export default {
   data() {
     return {
       dialog: false,
       dialogDelete: false,
-      pickedColor: null,
+      pickedColor: DEFAULT_COLOR,
       pickedStartDate: null,
       pickedEndDate: null,
       event: null,
@@ -164,6 +173,7 @@ export default {
         end_date: null,
         color: null,
       }),
+      errors: null,
     };
   },
   methods: {
@@ -173,11 +183,17 @@ export default {
           onSuccess: () => {
             this.dialog = false;
           },
+          onError: () => {
+            this.errors = this.$page.props.errors;
+          },
         });
       } else {
         this.form.put(`/events/${this.event.id}`, {
           onSuccess: () => {
             this.dialog = false;
+          },
+          onError: () => {
+            this.errors = this.$page.props.errors;
           },
         });
       }
@@ -199,8 +215,9 @@ export default {
       if (!val) {
         this.pickedStartDate = null;
         this.pickedEndDate = null;
-        this.pickedColor = null;
         this.form.reset();
+        this.pickedColor = DEFAULT_COLOR;
+        this.errors = null;
       }
     },
     pickedColor: function (val) {
@@ -213,8 +230,6 @@ export default {
       } else {
         this.form.color = null;
       }
-
-      console.log(this.form.color);
     },
     pickedStartDate: function (val) {
       if (val) {
@@ -249,7 +264,7 @@ export default {
       this.form.description = event ? event.description : null;
       this.pickedStartDate = event ? moment(event.start).toDate() : null;
       this.pickedEndDate = event ? moment(event.end).toDate() : null;
-      this.pickedColor = event ? event.color : null;
+      this.pickedColor = event ? event.color : DEFAULT_COLOR;
     });
   },
 };
